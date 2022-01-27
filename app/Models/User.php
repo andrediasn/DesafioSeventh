@@ -41,4 +41,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    // Relacionamento com registro de logs
+    public function accesses(){
+        return $this->hasMany(Access::class);
+    }
+    public function registerAccess(){
+        // Cadastra na tabela accesses um novo registro com as informações do usuário logado + data e hora
+        return $this->accesses()->create([
+            'user_id'   => $this->id,
+            'datetime'  => date('YmdHis'),
+        ]);
+    }
 }
