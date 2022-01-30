@@ -14,9 +14,10 @@ class AuthController extends Controller
 {
     
         public function __construct() {
-            $this->middleware('auth:api', ['except' => ['create', 'login']]);
+            $this->middleware('auth:api', ['except' => ['create', 'login', 'unauthorized']]);
         }
         
+        // endpoint = http://127.0.0.1:8000/api/user
         public function create(Request $request){
     
             $message['success'] = false;
@@ -32,9 +33,9 @@ class AuthController extends Controller
                 return response()->json(['success'=>false, 'message'=>$validator->errors()->all()]);
             }
     
-            $name = $request->input('name');
-            $email = $request->input('email');
-            $password = $request->input('password');
+            $name = $request->name;
+            $email = $request->email;
+            $password = $request->password;
             $emailExists = User::where('email', $email)->count();
 
             if($emailExists === 0) {
@@ -56,6 +57,7 @@ class AuthController extends Controller
                 }
 
                 $info = auth()->user();
+                $info['avatar'] = url('media/avatars/'.$info['avatar']);
                 $message['success'] = true;
                 $message['data'] = $info;
                 $message['token'] = $token;
@@ -68,5 +70,60 @@ class AuthController extends Controller
 
             
             return $message;
+        }
+
+        // endpoint = http://127.0.0.1:8000/api/auth/login
+        public function login(Request $request) {
+            $message['success'] = false;
+
+            $email = $request->email;
+            $password = $request->password;
+
+            $token = auth()->attempt([
+                'email' => $email,
+                'password' => $password
+            ]);
+
+            if(!$token) {
+                $message['error'] = 'Usuario e/ou senha incorretos!';
+                return $message;
+            }
+
+            $info = auth()->user();
+            $info['avatar'] = url('media/avatars/'.$info['avatar']);
+            $message['success'] = true;
+            $message['data'] = $info;
+            $message['token'] = $token;
+
+            return $message;
+        }
+
+        // endpoint = http://127.0.0.1:8000/api/auth/logout
+        public function logout(){
+            auth()->logout();
+            return ['success' => true];
+        }
+
+        // endpoint = http://127.0.0.1:8000/api/auth/refresh
+        public function refresh() {
+
+            $message['success'] = false;
+            
+            $token = auth()->refresh();
+
+            $info = auth()->user();
+            $info['avatar'] = url('media/avatars/'.$info['avatar']);
+            $message['success'] = true;
+            $message['data'] = $info;
+            $message['token'] = $token;
+
+            return $message;
+        }
+
+
+        public function unauthorized(){
+            return response()->json([
+                'error' => 'Não autorizado.'
+            ], 401);
         }
 }
