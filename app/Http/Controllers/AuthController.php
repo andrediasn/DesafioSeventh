@@ -25,8 +25,8 @@ class AuthController extends Controller
             // Verificação
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'email' => 'required|string',
-                'password' => 'required|string|max:255',
+                'email' => 'required|string|email',
+                'password' => 'required|string|min:8',
             ]);
 
             if($validator->fails()){

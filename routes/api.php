@@ -28,9 +28,9 @@ Route::post('auth/logout', [AuthController::class, 'logout']);
 Route::post('auth/refresh', [AuthController::class, 'refresh']);
 Route::post('/user', [AuthController::class, 'create']);
 
-//Route::get('/user', [UserController::class, 'read']);
-//Route::get('/user', [UserController::class, 'update']);
+Route::get('/user', [UserController::class, 'read']);
+Route::put('/user', [UserController::class, 'update']);
+Route::post('/user/avatar', [UserController::class, 'updateAvatar']);
 
 Route::get('/users', [UserController::class, 'list']);
 Route::get('/user/{id}', [UserController::class, 'one']);
-Route::get('/search', [UserController::class, 'search']);

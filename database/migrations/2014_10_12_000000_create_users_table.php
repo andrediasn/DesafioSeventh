@@ -22,7 +22,6 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('avatar')->default('noimage.png');
             $table->enum('theme',['l', 'd'])->default('l')->comment('(l)ight, (d)ark');
-            $table->string('cell_number')->nullable();
             $table->rememberToken();
             $table->timestamps();
 
