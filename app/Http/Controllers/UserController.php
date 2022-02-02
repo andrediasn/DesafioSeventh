@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 
-
 class UserController extends Controller
 {
     private $loggedUser;
@@ -20,6 +19,12 @@ class UserController extends Controller
     public function __construct() {
         $this->middleware('auth:api');
         $this->loggedUser = auth()->user();
+    }
+
+    public function index()
+    {
+        $data_view = DB::table('billboards')->get();
+        return view('admin.content.billboard', compact('data_view'));
     }
 
     public function read() {
@@ -36,8 +41,8 @@ class UserController extends Controller
     }
 
     public function list(Request $request) {
-
-        $users = User::all();
+        return dd('oi');
+        /* $users = User::all();
 
         foreach($users as $key => $value){
             $users[$key]['avatar'] = url('media/avatars/'.$users[$key]['avatar']);
@@ -45,7 +50,15 @@ class UserController extends Controller
 
         $message['data'] = $users;
 
-        return $message;
+        echo json_encode($message); */
+        $select = ['users.id','users.name','users.email', 'grouppermissions.name as groupName'];
+
+        $data_view = DB::table('users')
+                        ->join('grouppermissions','grouppermissions.id', 'users.id_grouppermissions')
+                        ->select($select)
+                        ->get();
+
+        return view('admin.content.users',compact('data_view'));
     }
 
     public function one($id){
@@ -127,6 +140,5 @@ class UserController extends Controller
         echo json_encode($message);
 
     }
-
 }
 

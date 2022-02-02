@@ -20,8 +20,6 @@ class AuthController extends Controller
         // endpoint = http://127.0.0.1:8000/api/user
         public function create(Request $request){
     
-            $message['success'] = false;
-    
             // Verificação
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
@@ -30,7 +28,7 @@ class AuthController extends Controller
             ]);
 
             if($validator->fails()){
-                return response()->json(['success'=>false, 'message'=>$validator->errors()->all()]);
+                return $this->sendError('Dados incorretos.', $validator->errors());
             }
     
             $name = $request->name;
@@ -52,29 +50,23 @@ class AuthController extends Controller
                 ]);
 
                 if(!$token) {
-                    $message['error'] = 'Ocorreu um erro!';
-                    return $message;
+                    return $this->sendError('Erro.', $validator->errors());
                 }
 
                 $info = auth()->user();
                 $info['avatar'] = url('media/avatars/'.$info['avatar']);
-                $message['success'] = true;
-                $message['data'] = $info;
+                $message['user'] = $info;
                 $message['token'] = $token;
 
+                return $this->sendResponse($message, 'Cadastro realizado.');
 
             } else {
-                $message['error'] = 'E-mail já cadastrado!';
-                return $message;
-            }
-
-            
-            return $message;
+                return $this->sendError('Email já cadastrado.');
+            }  
         }
 
         // endpoint = http://127.0.0.1:8000/api/auth/login
         public function login(Request $request) {
-            $message['success'] = false;
 
             $email = $request->email;
             $password = $request->password;
@@ -83,25 +75,25 @@ class AuthController extends Controller
                 'email' => $email,
                 'password' => $password
             ]);
-
+            
             if(!$token) {
-                $message['error'] = 'Usuario e/ou senha incorretos!';
-                return $message;
+                return $this->sendError('Usuário e/ou senha incorretos!');
             }
+
 
             $info = auth()->user();
             $info['avatar'] = url('media/avatars/'.$info['avatar']);
-            $message['success'] = true;
-            $message['data'] = $info;
+            $message['user'] = $info;
             $message['token'] = $token;
 
             return $message;
+            //return $this->sendResponse($message, 'Login confirmado.');
         }
 
         // endpoint = http://127.0.0.1:8000/api/auth/logout
         public function logout(){
             auth()->logout();
-            return ['success' => true];
+            return response()->json('Logout realizado.', 200);
         }
 
         // endpoint = http://127.0.0.1:8000/api/auth/refresh
@@ -114,10 +106,10 @@ class AuthController extends Controller
             $info = auth()->user();
             $info['avatar'] = url('media/avatars/'.$info['avatar']);
             $message['success'] = true;
-            $message['data'] = $info;
+            $message['user'] = $info;
             $message['token'] = $token;
 
-            return $message;
+            return response()->json($message, 200);
         }
 
 
@@ -125,5 +117,37 @@ class AuthController extends Controller
             return response()->json([
                 'error' => 'Não autorizado.'
             ], 401);
+        }
+
+        /**
+        * success response method.
+        * @return \Illuminate\Http\Response
+        */
+        public function sendResponse($result, $message){
+
+            $response = [
+                'success' => true,
+                'data'    => $result,
+                'message' => $message,
+            ];
+            return response()->json($response, 200);
+        }
+
+        /**
+        * return error response.
+        * @return \Illuminate\Http\Response
+        */
+        public function sendError($error, $errorMessages = [], $code = 404){
+
+            $response = [
+                'success' => false,
+                'message' => $error,
+            ];
+
+            if(!empty($errorMessages)){
+                $response['data'] = $errorMessages;
+            }
+
+            return response()->json($response, $code);
         }
 }

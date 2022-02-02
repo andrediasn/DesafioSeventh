@@ -58,7 +58,7 @@ class InitialSeeder extends Seeder
         ]);
 
         DB::table('grouppermissions')->insert([
-            'name' => 'User',
+            'name' => 'Cliente',
             'id_permission' => 2,
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),

@@ -18,7 +18,6 @@ class CreateUsersTable extends Migration
             $table->unsignedBigInteger('id_grouppermissions')->default('2');
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('avatar')->default('noimage.png');
             $table->enum('theme',['l', 'd'])->default('l')->comment('(l)ight, (d)ark');
